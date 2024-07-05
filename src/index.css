@@ -84,6 +84,14 @@ body {
   margin-left: var(--default-spacing);
 }
 
+.imagePreview {
+  width: 200px;
+  height: 200px;
+  border-radius: 10px;
+  display: flex;
+  margin-top: var(--default-spacing);
+}
+
 .images {
   margin-top: var(--medium-margin);
   display: grid;
@@ -96,6 +104,7 @@ body {
 .images .image {
   width: 200px;
   height: 200px;
+  border-radius: 10px;
   justify-self: center;
   align-self: center;
   margin-left: 5px;

@@ -15,11 +15,6 @@ const App = () => {
     fetchImages();
   };
 
-  const handleImageSearch = (event) => {
-    event.preventDefault();
-    // fetchImages();
-  };
-
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
@@ -29,7 +24,7 @@ const App = () => {
     };
 
     reader.readAsDataURL(file);
-    handleImageSearch();
+    // fetchImages();
   }
 
   const fetchImages = async () => {
@@ -59,10 +54,10 @@ const App = () => {
               accept="image/*"
               onChange={handleImageChange}
             />
-            {selectedImage && <img src={selectedImage} alt='Preview' className='img-thumbnail' width='200' height='200'/>}
+            {selectedImage && <img src={selectedImage} alt='Preview' className='imagePreview' width='200' height='200'/>}
           </Form.Group>
 
-          <Form.Group className='mt-4'>
+          <Form.Group className='mt-5'>
           <Form.Label className='fw-bold'>Search by keywords</Form.Label>
             <Form.Control
               type='search'
