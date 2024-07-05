@@ -1,18 +1,27 @@
 import React, { useRef, useState } from 'react';
-import { Form } from 'react-bootstrap';
+import { Form, InputGroup, Button } from 'react-bootstrap';
 import axios from 'axios';
 import './index.css';
 
-const IMAGES_PER_PAGE = 5;
-
 const App = () => {
   const searchInput = useRef(null);
+  const imageInput = useRef(null);
+
   const [images, setImages] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
 
   const handleTextSearch = (event) => {
     event.preventDefault();
-    fetchImages();
+    const searchValue = searchInput.current.value;
+
+    // clear results
+    setImages([]);
+    // clear form fields
+    imageInput.current.value = '';
+    // clear file preview
+    setSelectedImage(null);
+
+    fetchImagesbyText(searchValue);
   };
 
   const handleImageChange = (event) => {
@@ -22,20 +31,39 @@ const App = () => {
     reader.onloadend = () => {
       setSelectedImage(reader.result);
     };
-
     reader.readAsDataURL(file);
-    // fetchImages();
   }
 
-  const fetchImages = async () => {
-    let fullUrl = `${process.env.REACT_APP_API_URL}?query=${searchInput.current.value}&page=1&per_page=${IMAGES_PER_PAGE}&client_id=${process.env.REACT_APP_IMAGE_API_KEY}`;
-    console.log(fullUrl);
-
+  const fetchImagesbyText = async (searchValue) => {
     try {
-      const { data } = await axios.get(fullUrl);
-      // DEBUG:
-      console.log('data', data);
-      setImages(data.results);
+      const { data } = await axios.post(process.env.REACT_APP_AZURE_TEXT_API_URL, {
+        text: searchValue
+      })
+      setImages(data.similarImages);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleImageSearch = async (event) => {
+    event.preventDefault();
+    // clear search field
+    searchInput.current.value = '';
+
+    const formData = new FormData();
+    formData.append('image', event.target[0].files[0]);
+
+    fetchImagesbyImage(formData);
+  }
+
+  const fetchImagesbyImage = async (formData) => {
+    try {
+      const { data } = await axios.post(process.env.REACT_APP_AZURE_IMAGE_API_URL, formData,
+      {
+        headers: {
+            "Content-type": "multipart/form-data",
+        }})
+      setImages(data.similarImages);
     } catch (error) {
       console.log(error);
     }
@@ -45,40 +73,52 @@ const App = () => {
     <div className='container'>
       <h1 className='title'>Image Search</h1>
       <div className='search-section'>
-        <Form onSubmit={handleTextSearch}>
-          <Form.Group>
+        <Form onSubmit={handleImageSearch}>
             <Form.Label className='fw-bold'>Search by image</Form.Label>
-            <Form.Control
-              type="file"
-              size="lg"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
-            {selectedImage && <img src={selectedImage} alt='Preview' className='imagePreview' width='200' height='200'/>}
-          </Form.Group>
-
-          <Form.Group className='mt-5'>
-          <Form.Label className='fw-bold'>Search by keywords</Form.Label>
-            <Form.Control
-              type='search'
-              placeholder='Keyword search'
-              className='search-input'
-              ref={searchInput}
-            />
-          </Form.Group>
+            <InputGroup className='mb-3'>
+              <Form.Control
+                type="file"
+                size="lg"
+                accept="image/*"
+                onChange={handleImageChange}
+                ref={imageInput}
+              />
+              <Button type='submit' variant='primary'>
+                  Search
+              </Button>
+            </InputGroup>
+            {selectedImage && <img src={selectedImage} alt='Preview' className='imagePreview mb-3' width='200' height='200'/>}
         </Form>
       </div>
+
+      <div className='search-section'>
+        <Form onSubmit={handleTextSearch}>
+          <Form.Label className='fw-bold'>Search by keywords</Form.Label>
+            <InputGroup className='mb-3'>
+              <Form.Control
+                type='search'
+                placeholder='Keyword search'
+                className='search-input'
+                ref={searchInput}
+              />
+              <Button type='submit' variant='primary'>
+                  Search
+              </Button>
+            </InputGroup>
+        </Form>
+      </div>
+
       <div className='images'>
       {images.map((image) => {
         return (
-          <div key={image.id}>
+          <div key={image.objectId}>
             <img
-              key={image.id}
-              src={image.urls.small}
-              alt={image.alt_description}
+              key={image.objectId}
+              src={image.imageUrl}
+              alt={image.title}
               className='image'
             />
-            <div className='imageText'>{image.alt_description}</div>
+            <div className='imageText'>{image.title}</div>
           </div>
         );
       })}

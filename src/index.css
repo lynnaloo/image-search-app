@@ -69,19 +69,14 @@ body {
 /* common css ends */
 
 .search-section {
-  display: flex;
+  display: flex-wrap;
   justify-content: center;
-  align-items: center;
+  
   margin-top: var(--default-margin);
 }
 
 .search-section .search-input {
-  min-width: 500px;
   padding: var(--default-spacing);
-}
-
-.search-section .search-btn {
-  margin-left: var(--default-spacing);
 }
 
 .imagePreview {

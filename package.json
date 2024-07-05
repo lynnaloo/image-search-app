@@ -12,7 +12,7 @@
     "react-scripts": "5.0.1"
   },
   "scripts": {
-    "start": "EXTEND_ESLINT=true react-scripts start",
+    "start": "EXTEND_ESLINT=true PORT=3000 react-scripts start",
     "build": "EXTEND_ESLINT=true react-scripts build",
     "test": "EXTEND_ESLINT=true react-scripts test"
   },
